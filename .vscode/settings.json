@@ -5,5 +5,6 @@
         "plotly",
         "Tsuchinshan",
         "yaxes"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }
