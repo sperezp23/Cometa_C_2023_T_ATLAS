@@ -5,10 +5,13 @@
         "lightcurve",
         "Lightcurve",
         "metodo",
+        "Minimos",
         "movil",
         "plotly",
         "Tsuchinshan",
-        "yaxes"
+        "xaxis",
+        "yaxes",
+        "yaxis"
     ],
     "python.analysis.typeCheckingMode": "basic"
 }
