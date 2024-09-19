@@ -22,9 +22,9 @@ def verificar_conexion():
         return False
     
 # %%  Conexión con la API de COBS
-nombre_cometa = 'C/2023'
+nombre_cometa = 'C/2017 K2' #'C/2023 A3' 
 
-Link_cops_API = f'https://cobs.si/api/obs_list.api?des={nombre_cometa} A3&format=json&from_date=&to_date=&exclude_faint=False&exclude_not_accurate=False'
+Link_cops_API = f'https://cobs.si/api/obs_list.api?des={nombre_cometa}&format=json&from_date=&to_date=&exclude_faint=False&exclude_not_accurate=False'
 
 if verificar_conexion():
     response = requests.get(Link_cops_API)
@@ -39,6 +39,7 @@ else:
 
 # %% Creación del data frame Cometa
 cometa_df = pd.DataFrame(content['objects'])
+
 
 # %% Tratamiento de los datos de interés
 cometa_df['obs_method_key'] = cometa_df.obs_method.apply(lambda registro: registro['key'])
@@ -60,7 +61,7 @@ fecha_inicial = curva_de_luz_cruda_df.obs_date.min()
 fecha_final = curva_de_luz_cruda_df.obs_date.max()
 fechas = (fecha_final - fecha_inicial).days
 
-ephemeris = MPC.get_ephemeris('C/2023 A3', start = str(fecha_inicial), number = fechas + 1) # type: ignore
+ephemeris = MPC.get_ephemeris(nombre_cometa, start = str(fecha_inicial), number = fechas + 1) # type: ignore
 
 ephemeris_df = ephemeris.to_pandas()
 ephemeris_df.columns = ephemeris_df.columns.str.lower().str.replace(' ', '_')
