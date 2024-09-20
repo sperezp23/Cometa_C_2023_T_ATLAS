@@ -22,13 +22,12 @@ def verificar_conexion():
         return False
     
 # %%  Conexión con la API de COBS
-nombre_cometa = 'C/2017 K2' #'C/2023 A3' 
+nombre_cometa = input('Ingrese el nombre del cometa:\n') #'C/2023 A3' 
 
 Link_cops_API = f'https://cobs.si/api/obs_list.api?des={nombre_cometa}&format=json&from_date=&to_date=&exclude_faint=False&exclude_not_accurate=False'
 
 if verificar_conexion():
     response = requests.get(Link_cops_API)
-
 
 if response.status_code == 200:
     content = response.json()
@@ -59,13 +58,12 @@ print('✅ Curva de luz cruda creada.')
 # %%  Creación de data frame Ephemeris (conexión con la API del MPC)
 fecha_inicial = curva_de_luz_cruda_df.obs_date.min()
 fecha_final = curva_de_luz_cruda_df.obs_date.max()
-fechas = (fecha_final - fecha_inicial).days
+fechas = (fecha_final - fecha_inicial).days + 1 if (fecha_final - fecha_inicial).days <= 1441 else 1441
 
-ephemeris = MPC.get_ephemeris(nombre_cometa, start = str(fecha_inicial), number = fechas + 1) # type: ignore
+ephemeris = MPC.get_ephemeris(nombre_cometa, start = str(fecha_inicial), number = fechas) # type: ignore
 
 ephemeris_df = ephemeris.to_pandas()
 ephemeris_df.columns = ephemeris_df.columns.str.lower().str.replace(' ', '_')
-
 # %% Creación del data frame ephemeris filtrada
 ephemeris_filtrada_df = ephemeris_df[['date', 'delta','r', 'phase']].copy()
 ephemeris_filtrada_df = ephemeris_filtrada_df.rename(columns = {'date':'obs_date'})
@@ -84,7 +82,7 @@ curva_de_luz_procesada_df['magnitud_reducida'] = (
 
 # %% Curva de luz reducida
 labels = {'obs_date':'Observation Date','magnitud_reducida':'Apparent total magnitude processed', 'obs_method_key' : 'Observation Method'}
-fig = px.scatter(curva_de_luz_procesada_df, x='obs_date', y='magnitud_reducida', color='obs_method_key', template= 'plotly_dark', labels= labels, title='Reduced Lightcurve of comet C/2023 A3 (Tsuchinshan-ATLAS)')
+fig = px.scatter(curva_de_luz_procesada_df, x='obs_date', y='magnitud_reducida', color='obs_method_key', template= 'plotly_dark', labels= labels, title=f'Reduced Lightcurve of comet {nombre_cometa} (Tsuchinshan-ATLAS)')
 fig.update_yaxes(autorange="reversed")
 fig.show()
 print('✅ Curva de luz reducida creada.')
@@ -101,14 +99,14 @@ curva_de_luz_externa_df['promedio_movil'] = curva_de_luz_externa_df.magnitud_red
 
 # %% Curva de luz reducida
 labels = {'obs_date':'Observation Date','magnitud_reducida':'Max apparent total magnitude reduced', 'obs_method_key' : 'Observation Method'}
-fig = px.scatter(curva_de_luz_externa_df, x=curva_de_luz_externa_df.obs_date, y='magnitud_reducida', color='obs_method_key', template= 'plotly_dark', labels= labels, title='Min Lightcurve of comet C/2023 A3 (Tsuchinshan-ATLAS)')
+fig = px.scatter(curva_de_luz_externa_df, x=curva_de_luz_externa_df.obs_date, y='magnitud_reducida', color='obs_method_key', template= 'plotly_dark', labels= labels, title=f'Max Lightcurve of comet {nombre_cometa} (Tsuchinshan-ATLAS)')
 fig.update_yaxes(autorange="reversed")
 fig.show()
 print('✅ Maxima curva de luz reducida creada.')
 
-# %%  Gráfica de lus promediada
+# %%  Gráfica de luz promediada
 labels = {'obs_date':'Observation Date','magnitud_reducida':'Magnitude reduced'}
-fig = px.scatter(curva_de_luz_externa_df, x=curva_de_luz_externa_df.obs_date, y='promedio_movil', template= 'plotly_dark', labels= labels, title='Max Averaged Lightcurve of comet C/2023 A3 (Tsuchinshan-ATLAS)')
+fig = px.scatter(curva_de_luz_externa_df, x=curva_de_luz_externa_df.obs_date, y='promedio_movil', template= 'plotly_dark', labels= labels, title=f'Max Averaged Lightcurve of comet {nombre_cometa} (Tsuchinshan-ATLAS)')
 fig.update_traces(marker=dict(color='yellow', size=6, line=dict(width=1, color='DarkSlateGrey')))
 fig.update_yaxes(autorange="reversed")
 fig.show()
